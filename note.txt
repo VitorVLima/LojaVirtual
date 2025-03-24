@@ -1,0 +1,11 @@
+bibliotecas de instalação:
+- pip install flask
+- pip install flask-SQLAlchemy
+- pip install flask-wtf
+
+biblioteca encripitar:
+- pip install flask-bcrypt
+
+atualizar imagens e videos no banco:
+- pip install flask-uploads
+- pip install -U Werkzeug==0.16.0

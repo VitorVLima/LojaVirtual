@@ -1,0 +1,121 @@
+{%extends 'layouts.html'%}
+
+{%block content%}
+
+<div class="container p-2">
+    <nav class="navbar navbar-dark bg-dark fixed-top p-2">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="{{url_for('home')}}">Veiculos Esportivos</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Veiculos Esportivos</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+              <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{{url_for('home')}}">Produtos</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">Carrinho</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Marcas
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-dark">
+                    {%for marca in marcas %}
+                    <li><a class="dropdown-item" href="{{url_for('get_marca', id=marca.id) }}">{{marca.name}}</a></li>
+                    {%endfor%}
+                  </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Categorias
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                      {%for categoria in categorias %}
+                      <li><a class="dropdown-item" href="{{url_for('get_categoria', id=categoria.id) }}">{{categoria.name}}</a></li>
+                      {%endfor%}
+                    </ul>
+                  </li>
+              </ul>
+              <form class="d-flex mt-3" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-success" type="submit">Search</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+</div>
+
+<div class="container">
+    <div class="row">
+        {%if marca%}
+        {%for m in marca %}
+        <div class="col-md-3 mt-5" >
+            <div class="card" style="box-shadow: 1px 1px 10px rgb(82, 79, 79);">
+                <img src="{{url_for('static', filename='images/'+ m.image_1)}}" alt="{{m.name}}" class="card-img-top" height="180">
+                <div class="card-body">
+                    {%if m.discount > 0%}
+                    <p class="text-danger" style="text-shadow: 1px 1px 2px black;">{{m.discount}}% OFF </p>
+                    {% endif%}
+                    <H4 class="tex-center">{{m.name}}</H4>
+                    <p class="tex-center"> Preço R$ {{m.price}}</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="#" class="btn btn-success mt-2">Detalhes do Produto</a>
+                    <a href="#" class="btn btn-primary mt-2">Adicionar ao Carrinho</a>
+                </div>
+            </div>
+        </div>
+        {%endfor%}
+
+        {%elif categoria%}
+        {%for c in categoria %}
+        <div class="col-md-3 mt-5" >
+            <div class="card" style="box-shadow: 1px 1px 10px rgb(82, 79, 79);">
+                <img src="{{url_for('static', filename='images/'+ c.image_1)}}" alt="{{c.name}}" class="card-img-top" height="180">
+                <div class="card-body">
+                    {%if c.discount > 0%}
+                    <p class="text-danger" style="text-shadow: 1px 1px 2px black;">{{c.discount}}% OFF </p>
+                    {% endif%}
+                    <H4 class="tex-center">{{c.name}}</H4>
+                    <p class="tex-center"> Preço R$ {{c.price}}</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="#" class="btn btn-success mt-2">Detalhes do Produto</a>
+                    <a href="#" class="btn btn-primary mt-2">Adicionar ao Carrinho</a>
+                </div>
+            </div>
+        </div>
+        {%endfor%}
+
+        {%else%}
+        {%for produto in produtos %}
+        <div class="col-md-3 mt-5" >
+            <div class="card" style="box-shadow: 1px 1px 10px rgb(82, 79, 79);">
+              <a href="#"><img src="{{url_for('static', filename='images/'+ produto.image_1)}}" alt="{{produto.name}}" class="card-img-top" height="180"></a>
+                <div class="card-body">
+                    {%if produto.discount > 0%}
+                    <p class="text-danger" style="text-shadow: 1px 1px 2px black;">{{produto.discount}}% OFF </p>
+                    {% endif%}
+                    <H4 class="tex-center">{{produto.name}}</H4>
+                    <p class="tex-center"> Preço R$ {{produto.price}}</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="#" class=" btn btn-success mt-2">Detalhes do Produto</a>
+                    <a href="#" class=" btn btn-primary mt-2">Adicionar ao Carrinho</a>
+                </div>
+            </div>
+        </div>
+        {%endfor%}
+        {%endif%}
+</div>
+
+
+{%endblock%}

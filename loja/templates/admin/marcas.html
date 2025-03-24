@@ -1,0 +1,149 @@
+{% extends 'layouts.html'%}
+
+{% block content%}
+
+{%include '_messages.html'%}
+
+
+<div class="container">
+
+  <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/admin">Administrador</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/admin">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/marcas">Fabricantes</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/categoria">Categorias</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Add Produtos
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="{{url_for('addproduto')}}">Add Produtos</a></li>
+                  <li><a class="dropdown-item" href="{{url_for('addmarca')}}">Add Marcas</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="{{url_for('addcat')}}">Add Categorias</a></li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" aria-disabled="false">Disabled</a>
+              </li>
+            </ul>
+            <form class="d-flex" role="search">
+              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+              <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+          </div>
+        </div>
+      </nav>
+
+</div>
+
+<div class="container mt-3">
+    <table class="table table-sm table-striped">
+        <thead>
+            <th>Serial</th>
+            <th>Nome</th>
+
+            <th>Editar</th>
+            <th>Deletar</th>
+        </thead>
+        
+            {%if marcas%}
+        <tbody>
+            {%for marca in marcas%}
+            <tr>
+                <td>{{loop.index}}</td>
+                <td>{{marca.name}}</td>
+
+                <td><a href="{{url_for('updatemarca', id=marca.id)}}" class="btn btn btn-primary">Editar</a></td>
+                <td><!-- Button trigger modal -->
+                  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#{{marca.id}}">
+                    Deletar
+                  </button></td>
+            </tr>
+
+                        <!-- Button trigger modal -->
+
+           <!-- Modal -->
+          <div class="modal fade" id="{{marca.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="exampleModalLabel">{{marca.name}}</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <span class="text-danger">DESEJA REALMENTE DELETAR ESSA MARCA?</span>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancelar</button>
+                  <form action="{{url_for('deletemarca', id =marca.id)}}" method="post">
+                    <button type="submit" class="btn btn-danger">Deletar</button>
+                </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+            {% endfor %}
+          </tbody>
+
+            <a href="{{url_for('addmarca')}}" class="btn btn-primary">Adicionar</a>
+            <hr>
+            {%else%}
+          
+
+            <tbody>
+            {%for categoria in categorias%}
+            <tr>
+                <td>{{loop.index}}</td>
+                <td>{{categoria.name}}</td>
+
+                <td><a href="{{url_for('updatecat', id=categoria.id)}}" class="btn btn btn-primary">Editar</a></td>
+                <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#{{categoria.id}}">
+                  Deletar
+                  </button></td>
+            </tr>
+            <div class="modal fade" id="{{categoria.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                  <div class="modal-content">
+                  <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="exampleModalLabel">{{categoria.name}}</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                      <span class="text-danger">DESEJA REALMENTE DELETAR ESSA CATEGORIA?</span>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancelar</button>
+                      <form action="{{url_for('deletecat', id =categoria.id)}}" method="post">
+                      <button type="submit" class="btn btn-danger">Deletar</button>
+                  </form>
+                  </div>
+                  </div>
+              </div>
+              </div>
+            {% endfor %}
+          </tbody>
+            <a href="{{url_for('addcat')}}" class="btn btn-primary">Adicionar</a>
+            <hr>
+            {%endif%}
+  
+
+        
+    </table>
+   
+</div>
+
+{%endblock%}
