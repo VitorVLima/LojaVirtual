@@ -9,3 +9,6 @@ biblioteca encripitar:
 atualizar imagens e videos no banco:
 - pip install flask-uploads
 - pip install -U Werkzeug==0.16.0
+
+retirar  os acentos na hora de pesquisar:
+- pip install unidecode

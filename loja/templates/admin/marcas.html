@@ -59,7 +59,7 @@
             <th>Deletar</th>
         </thead>
         
-            {%if marcas%}
+  
         <tbody>
             {%for marca in marcas%}
             <tr>
@@ -99,46 +99,8 @@
             {% endfor %}
           </tbody>
 
-            <a href="{{url_for('addmarca')}}" class="btn btn-primary">Adicionar</a>
+            <a href="{{url_for('addmarca')}}" class="btn btn-danger">Adicionar</a>
             <hr>
-            {%else%}
-          
-
-            <tbody>
-            {%for categoria in categorias%}
-            <tr>
-                <td>{{loop.index}}</td>
-                <td>{{categoria.name}}</td>
-
-                <td><a href="{{url_for('updatecat', id=categoria.id)}}" class="btn btn btn-primary">Editar</a></td>
-                <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#{{categoria.id}}">
-                  Deletar
-                  </button></td>
-            </tr>
-            <div class="modal fade" id="{{categoria.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-              <div class="modal-dialog">
-                  <div class="modal-content">
-                  <div class="modal-header">
-                      <h1 class="modal-title fs-5" id="exampleModalLabel">{{categoria.name}}</h1>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                      <span class="text-danger">DESEJA REALMENTE DELETAR ESSA CATEGORIA?</span>
-                  </div>
-                  <div class="modal-footer">
-                      <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancelar</button>
-                      <form action="{{url_for('deletecat', id =categoria.id)}}" method="post">
-                      <button type="submit" class="btn btn-danger">Deletar</button>
-                  </form>
-                  </div>
-                  </div>
-              </div>
-              </div>
-            {% endfor %}
-          </tbody>
-            <a href="{{url_for('addcat')}}" class="btn btn-primary">Adicionar</a>
-            <hr>
-            {%endif%}
   
 
         

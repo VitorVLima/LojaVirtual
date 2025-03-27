@@ -1,0 +1,103 @@
+{%extends 'layouts.html'%}
+
+{%block content%}
+
+<div class="container p-2">
+    <nav class="navbar navbar-dark bg-dark fixed-top navbar-expand-lg p-2" style="box-shadow: 1px 1px 5px rgb(109, 107, 107);">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="{{url_for('home')}}">Loja Virtual</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Loja Virtual</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+              <ul class="navbar-nav justify-content-end flex-grow-1 pe-3 mt-2 mr-2">
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{{url_for('home')}}">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{{url_for('getCart')}}" tabindex="-1">Carrinho ({{session['LojainCarrinho']|length}})</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Marcas
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-dark">
+                    {%for marca in marcas %}
+                    <li><a class="dropdown-item" href="{{url_for('get_marca', id=marca.id) }}">{{marca.name}}</a></li>
+                    {%endfor%}
+                  </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Categorias
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                      {%for categoria in categorias %}
+                      <li><a class="dropdown-item" href="{{url_for('get_categoria', id=categoria.id) }}">{{categoria.name}}</a></li>
+                      {%endfor%}
+                    </ul>
+                  </li>
+              </ul>
+              <form method="get" action="{{ url_for('pesquisa') }}" class="d-flex mt-2" role="search">
+                <input type="text" name="query" placeholder="Buscar por produto..." value="{{ pesquisa  }}">
+                <button type="submit " class="btn btn-success">Pesquisar</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <table class="table table-sm mt-4">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Cor</th>
+                    <th>Preço</th>
+                    <th>Desconto</th>
+                    <th>Quantidade</th>
+                    <th>Subtotal</th>
+                    <th>Atualizar</th>
+                    <th>Deletar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set total = 0.0 %}  <!-- Inicializa o total como número flutuante -->
+                {% for key, produto in session['LojainCarrinho'].items() %}
+                    {% set desconto = 0.01 * (produto.discount | float) * (produto.price | float) %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ produto.name }}</td>
+                        <td>{{ produto.colors }}</td>
+                        <td>R$ {{ produto.price | float }}</td>
+                        <td>R$ {{ desconto | float }} / Unidade</td>
+                        <td>{{ produto.quantity }}</td>
+
+                        {% set subtotal = (produto.quantity | int) * ((produto.price | float) - desconto) %}
+                        {% set total = total + subtotal %}  <!-- Atualiza o total corretamente -->
+
+                        <td>R$ {{ subtotal | float }}</td>
+                        <td><a href="#">Atualizar</a></td>
+                        <td><a href="#">Remover</a></td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td><strong>Total a Pagar</strong></td>
+                    <td><strong>R$ {{ total | float }}</strong></td>  <!-- Exibe o total corretamente -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+{%endblock%}

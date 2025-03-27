@@ -3,27 +3,71 @@ from .form import Addprodutos
 from loja import db, app, photos
 from .models import Marca, Categoria, Addproduto
 import secrets, os
+from unidecode import unidecode
+from sqlalchemy import func
 
 @app.route("/")
 def home():
-    produtos = Addproduto.query.filter(Addproduto.stock>0)
+    #paginacao 
+    pagina = request.args.get('pagina',1,type=int)
+    produtos = Addproduto.query.filter(Addproduto.stock>0).order_by(Addproduto.id.desc()).paginate(page=pagina,per_page=8)
+    #aparecer dados na barra de nav
     marcas = Marca.query.join(Addproduto,(Marca.id == Addproduto.marca_id)).all()
     categorias = Categoria.query.join(Addproduto,(Categoria.id == Addproduto.categoria_id)).all()
-    return render_template('produtos/index.html', produtos = produtos, marcas = marcas, categorias=categorias)
+    return render_template('produtos/index.html', produtos = produtos, marcas = marcas, categorias=categorias, title = f"Home - Pág {pagina}")
 
 @app.route('/marca/<int:id>', methods=['GET','POST'])
 def get_marca(id):
-    marca = Addproduto.query.filter_by(marca_id=id).all()
+    pagina = request.args.get('pagina',1,type=int)
+    get_marca = Marca.query.filter_by(id = id).first_or_404()
+    marca = Addproduto.query.filter_by(marca_id=get_marca.id).paginate(page=pagina,per_page=2)
     marcas = Marca.query.join(Addproduto,(Marca.id == Addproduto.marca_id)).all()
     categorias = Categoria.query.join(Addproduto,(Categoria.id == Addproduto.categoria_id)).all()
-    return render_template('/produtos/index.html', marca = marca, marcas = marcas, categorias = categorias)
+    return render_template('/produtos/index.html', marca = marca, marcas = marcas, categorias = categorias, get_marca = get_marca, title = f"Produtos {get_marca.name} - Pág {pagina}")
 
 @app.route('/categoria/<int:id>', methods=['GET','POST'])
 def get_categoria(id):
-    categoria = Addproduto.query.filter_by(categoria_id=id).all()
+    pagina = request.args.get('pagina',1,type=int)
+    get_cat = Categoria.query.filter_by(id = id).first_or_404()
+    categoria = Addproduto.query.filter_by(categoria_id=get_cat.id).paginate(page=pagina,per_page=2)
+    #aparecer dados na barra de nav
     categorias = Categoria.query.join(Addproduto,(Categoria.id == Addproduto.categoria_id)).all()
     marcas = Marca.query.join(Addproduto,(Marca.id == Addproduto.marca_id)).all()
-    return render_template('/produtos/index.html', categoria = categoria, categorias = categorias, marcas = marcas)
+
+    return render_template('/produtos/index.html', categoria = categoria, categorias = categorias, marcas = marcas,get_cat = get_cat, title = f"Produtos {get_cat.name} - Pág {pagina}")
+
+@app.route('/produto/<int:id>', methods=['GET','POST'])
+def pagina_unica(id):
+    produto = Addproduto.query.get_or_404(id)
+    marcas = Marca.query.join(Addproduto,(Marca.id == Addproduto.marca_id)).all()
+    categorias = Categoria.query.join(Addproduto,(Categoria.id == Addproduto.categoria_id)).all()
+
+    return render_template('/produtos/pagina_unica.html', produto = produto, marcas = marcas, categorias = categorias, title = produto.name)
+
+@app.route('/pesquisa/', methods=['GET', 'POST'])
+def pesquisa():
+    pagina = request.args.get('pagina', 1, type=int)
+    termo = request.args.get('query', '').strip()  # Obtém o valor da pesquisa , strip é o mesmo que trim() do js
+
+    # Filtra os produtos se o usuário digitou algo na barra de pesquisa
+    if termo:
+    
+        produtosPesquisa = Addproduto.query.filter(
+            Addproduto.name.ilike(f'%{termo}%'),  # Aqui usamos `ilike` para ignorar maiúsculas/minúsculas
+            Addproduto.stock > 0
+        ).order_by(Addproduto.id.desc()).paginate(page=pagina, per_page=8)
+        if produtosPesquisa.items == []:
+            mensagem = "Nenhum item encontrado para a pesquisa."
+            flash(mensagem)
+    else:
+        # Se não houver pesquisa, exibe todos os produtos com estoque disponível
+        produtosPesquisa = Addproduto.query.filter(Addproduto.stock > 0).order_by(Addproduto.id.desc()).paginate(page=pagina, per_page=8)
+
+    # Aparece dados na barra de navegação (marcas e categorias)
+    marcas = Marca.query.join(Addproduto, (Marca.id == Addproduto.marca_id)).all()
+    categorias = Categoria.query.join(Addproduto, (Categoria.id == Addproduto.categoria_id)).all()
+
+    return render_template('/produtos/index.html', produtosPesquisa=produtosPesquisa, marcas=marcas, categorias=categorias, termo = termo, title = f"Pesquisar - Pág {pagina}")
 
 @app.route('/addmarca', methods=['GET','POST'])
 def addmarca():
@@ -38,7 +82,7 @@ def addmarca():
         db.session.commit()
         flash(f'A marca {getmarca} foi cadastrada com sucesso', 'success')
         return redirect(url_for('marcas'))
-    return render_template('/produtos/addmarca.html',marcas = 'marcas')
+    return render_template('/produtos/addmarca.html',marcas = 'marcas', title = "Registrar Fabricante")
 
 @app.route('/updatemarca/<int:id>', methods=['GET','POST'])
 def updatemarca(id):
@@ -85,7 +129,7 @@ def addcat():
         db.session.commit()
         flash(f'A Categoria {getmarca} foi cadastrada com sucesso', 'success')
         return redirect(url_for('categoria'))
-    return render_template('/produtos/addmarca.html')
+    return render_template('/produtos/addmarca.html', title = "Registrar Categoria")
 
 @app.route('/updatecat/<int:id>', methods=['GET','POST'])
 def updatecat(id):

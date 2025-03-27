@@ -33,7 +33,7 @@ def categoria():
         return redirect(url_for('login'))
     flash(f'Conectado como: {session['email']}','success')
     categorias = Categoria.query.order_by(Categoria.id.desc()).all()
-    return render_template('admin/marcas.html', title='Pagina Categorias', categorias = categorias)
+    return render_template('admin/categorias.html', title='Pagina Categorias', categorias = categorias)
 
 @app.route('/registrar', methods=['GET', 'POST'])
 def registrar():

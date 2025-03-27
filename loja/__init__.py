@@ -20,3 +20,4 @@ patch_request_class(app)
 
 from loja.admin import routes
 from loja.produtos import routes
+from loja.carrinho import carrinhos
