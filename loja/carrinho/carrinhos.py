@@ -1,6 +1,7 @@
 from flask import redirect, render_template, url_for, flash, request, session, current_app
 from loja import db, app
 from loja.produtos.models import Addproduto, Marca, Categoria
+import json
 
 #adicionar item ao carrinho com alto incremento
 def M_Dicionarios(dic1,dic2):
@@ -15,16 +16,17 @@ def M_Dicionarios(dic1,dic2):
 def addCarrinho():
     try:
         produto_id = request.form.get('produto_id')
-        quantity = request.form.get('quantity')
+        quantity = int(request.form.get('quantity'))
         color = request.form.get('colors')
         produto = Addproduto.query.filter_by(id = produto_id).first()
 
         if produto_id and quantity and color and request.method == 'POST':
             DicItems = {produto_id:{'name':produto.name,'price':float(produto.price), 'discount': produto.discount, 'color': color, 'quantity': quantity, 'image': produto.image_1, 'colors': produto.colors, 'stock': produto.stock}}
             if 'LojainCarrinho' in session:
-                print(session['LojainCarrinho'])
+                session.modified = True
+               
                 if produto_id in session['LojainCarrinho']:
-                    print("O produto já foi adicionado ao carrinho")
+                    session['LojainCarrinho'][produto_id]['quantity'] += quantity
                 else:
                     session['LojainCarrinho'] = M_Dicionarios(session['LojainCarrinho'], DicItems)
                     return redirect(request.referrer)
@@ -42,8 +44,8 @@ def getCart():
     marcas = Marca.query.join(Addproduto, (Marca.id == Addproduto.marca_id)).all()
     categorias = Categoria.query.join(Addproduto, (Categoria.id == Addproduto.categoria_id)).all()
 
-    if 'LojainCarrinho' not in session:
-        return redirect(request.referrer)
+    if 'LojainCarrinho' not in session or len(session['LojainCarrinho']) <= 0:
+        return redirect(url_for('home'))
 
     subtotal1 = 0
     for key, produto in session['LojainCarrinho'].items():
@@ -58,7 +60,7 @@ def getCart():
 
 @app.route('/updateCarro/<int:code>', methods = ['POST'])
 def updateCarro(code):
-    if 'LojainCarrinho' not in session and len(session['LojainCarrinho']) < 0:
+    if 'LojainCarrinho' not in session or len(session['LojainCarrinho']) <= 0:
         return redirect(url_for('home'))
     if request.method == 'POST':
         quantity = request.form.get('quantity')
@@ -74,6 +76,31 @@ def updateCarro(code):
         except Exception as e:
             print(e)
             return redirect(url_for('getCart'))
+
+@app.route('/remover/<int:id>', methods=['POST'])
+def rm_Item(id):
+    if 'LojainCarrinho' not in session or len(session['LojainCarrinho']) == 0:
+        return redirect(url_for('home'))  # Redireciona para a home se não houver carrinho ou se o carrinho estiver vazio
+
+    try:
+        session.modified = True
+        # Remove o item do carrinho com base no ID
+        if str(id) in session['LojainCarrinho']:
+            session['LojainCarrinho'].pop(str(id))
+            flash('Item foi removido com sucesso do carrinho')
+
+        # Verifica se o carrinho está vazio e redireciona para a home
+        if len(session['LojainCarrinho']) == 0:
+            return redirect(url_for('home'))
+
+        # Caso contrário, redireciona de volta para a página do carrinho
+        return redirect(url_for('getCart'))
+
+    except Exception as e:
+        print(e)  # Para depuração
+        print(session)  # Para verificação da sessão
+        return redirect(url_for('home'))  # Em caso de erro, redireciona para a home
+        
 
 
 @app.route('/vazio')

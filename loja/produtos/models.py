@@ -1,7 +1,9 @@
 from loja import db, app
 from datetime import datetime
 
+
 class Addproduto(db.Model):
+    __searchable__ = ['name', 'desc']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable = False, unique = False)
     price = db.Column(db.Numeric(10,2), nullable = False)

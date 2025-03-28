@@ -5,7 +5,7 @@
 {%include 'navbar.html'%}
 
 <div class="container mt-5">
-    {%include '_messages.html'%}
+    <div class="col bg-success">{%include '_messages.html'%}</div>
     <div class="row">
         <table class="table table-sm mt-4">
             <thead>
@@ -20,7 +20,9 @@
                     <th>Subtotal</th>
                     <th>Atualizar</th>
                     <th>Deletar</th>
+
                 </tr>
+  
             </thead>
             <tbody>
                 {% set total = 0.0 %}  <!-- Inicializa o total como número flutuante -->
@@ -28,14 +30,14 @@
                     {% set desconto = 0.01 * (produto.discount | float) * (produto.price | float) %}
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td><img src="{{url_for('static', filename = 'images/'+ produto.image)}}" alt="{{produto.name}}" height="50"></td>
+                        <td><a href="{{url_for('pagina_unica', id = key)}}"><img src="{{url_for('static', filename='images/'+produto.image)}}" alt="{{produto.name}}" height="50"></a></td>
                         <td>{{ produto.name }}</td>
                         <form action="{{url_for('updateCarro', code = key)}}" method="post">
 
 
                           <td>
                             {%set colors = produto.colors.split(',')%}
-                            <label for="colors">Cor do Produto</label>
+                            <label for="colors"></label>
                             <select name="color" id="color">
                               <option value="{{produto.color}}" style="display: none;"> {{produto.color|capitalize}}</option>
                                 {%for color in colors%}
@@ -54,19 +56,27 @@
                           {% set total = total + subtotal %}  <!-- Atualiza o total corretamente -->
                           <td>R$ {{ subtotal | float}}</td>
                           <td>
-                            <button type="submit" class="btn btn-success">Atualizar</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Atualizar</button>
                             </td>
                         </form>
-                        <td><a href="#">Remover</a></td>
+                        <td>
+                          <form action="{{url_for('rm_Item', id = key)}}" method="post">
+                            <button type="submit" class="btn btn-sm btn-danger">Remover</button>
+                          </form>
+                          </td>
                     </tr>
                 {% endfor %}
                 <tr>
                     <td></td>
-                    <td><a href="{{url_for('home')}}">Voltar</a></td>
-                    <td >Imposto</td>
+                    <td><form action="{{url_for('vazio_Cart')}}">
+                      <button type="submit" class="btn btn-warning btn-sm">Esvaziar Carrinho</button>
+                    </form></td>
+                    <td>Imposto</td>
                     <td colspan="2"> R$ {{imposto}}</td>
                     <td><strong>Total a Pagar</strong></td>
-                    <td><strong>R$ {{ valorpagar}}</strong></td>  <!-- Exibe o total corretamente -->
+                    <td colspan="2"><strong> R$ {{ valorpagar}}</strong></td>  <!-- Exibe o total corretamente -->
+                    
+                    <td ><a href="" class="btn btn-success btn-sm">Finalizar Compra</a></td>
                 </tr>
             </tbody>
         </table>

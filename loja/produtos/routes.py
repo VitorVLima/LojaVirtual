@@ -16,6 +16,12 @@ def home():
     categorias = Categoria.query.join(Addproduto,(Categoria.id == Addproduto.categoria_id)).all()
     return render_template('produtos/index.html', produtos = produtos, marcas = marcas, categorias=categorias, title = f"Home - Pág {pagina}")
 
+@app.route('/pesquisaUsuario')
+def pesquisaUsuario():
+    searchword = request.args.get('q')
+    produtos = Addproduto.query.msearch(searchword, fields = ['name', 'desc'], limit=3)
+    return render_template('produtos.pesquisar.html', produtos = produtos)
+
 @app.route('/marca/<int:id>', methods=['GET','POST'])
 def get_marca(id):
     pagina = request.args.get('pagina',1,type=int)
