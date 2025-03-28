@@ -13,4 +13,5 @@ atualizar imagens e videos no banco:
 retirar  os acentos na hora de pesquisar:
 - pip install unidecode
 
--pip install flask-msearch
+para login:
+- pip install flask-login

@@ -40,9 +40,10 @@
                   </li>
               </ul>
               <form method="get" action="{{ url_for('pesquisa') }}" class="d-flex mt-2" role="search">
-                <input type="text" name="query" placeholder="Buscar por produto..." value="{{ pesquisa  }}">
-                <button type="submit " class="btn btn-success">Pesquisar</button>
+                <input type="text" name="query" placeholder="Buscar por produto..." value="{{ pesquisa  }}" class="mr-1">
+                <button type="submit " class="btn btn-success btn-sm">Pesquisar</button>
               </form>
+            
             </div>
           </div>
         </div>
