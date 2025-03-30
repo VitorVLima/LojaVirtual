@@ -43,7 +43,7 @@ def cadastrar_clientes():
     if form.validate_on_submit():
         print("Formulário validado com sucesso!") #adicione essa linha.
         hash_password = bcrypt.generate_password_hash(form.password.data)
-        cadastrar = CadastrarCliente(name = form.name.data, username = form.username.data, email = form.email.data, password = hash_password, country = form.country.data, state = form.state.data, city= form.city.data, address = form.address.data,contact = form.contact.data, zipcode = form.zipcode.data)
+        cadastrar = CadastrarCliente(name = form.name.data.title(), username = form.username.data, email = form.email.data, password = hash_password, country = form.country.data, state = form.state.data, city= form.city.data, address = form.address.data,contact = form.contact.data, zipcode = form.zipcode.data)
         db.session.add(cadastrar)
         flash(f'Obrigado {form.name.data} pelo seu cadastro', 'success')
         db.session.commit()
@@ -161,3 +161,33 @@ def get_pdf(notaFiscal):
             response.headers['content-Disposition'] = 'attachment;filename=' + notaFiscal +'. pdf'
             return response
     return redirect(url_for('pedidos'))
+
+
+@app.route('/cliente/historico', methods=['GET', 'POST'])
+@login_required
+def historico():
+    if current_user.is_authenticated:
+        cliente_id = current_user.id
+        pedidos = ClientePedido.query.filter_by(cliente_id=cliente_id).all()
+
+        # Inicializar a variável subtotal
+        subtotal = 0
+
+        # Iterar sobre cada pedido
+        for pedido in pedidos:
+            if isinstance(pedido.pedido, str):  # Verificar se o pedido é uma string
+                pedido.pedido = json.loads(pedido.pedido)
+
+            # Agora que pedido.pedido é um dicionário, podemos processar os itens
+            for _key, produto in pedido.pedido.items():
+                discount = (produto['discount'] / 100) * float(produto['price'])
+                subtotal += (float(produto['price']) - discount) * int(produto['quantity'])
+
+        imposto = round(0.06 * subtotal, 2)  # Imposto de 6%
+        gTotal = round(subtotal + imposto, 2)
+
+        marcas = Marca.query.join(Addproduto, (Marca.id == Addproduto.marca_id)).all()
+        categorias = Categoria.query.join(Addproduto, (Categoria.id == Addproduto.categoria_id)).all()
+
+    return render_template('cliente/historico.html', pedidos=pedidos, marcas=marcas, categorias=categorias, title='Histórico de pedidos', imposto=imposto, subtotal=subtotal, gTotal=gTotal)
+

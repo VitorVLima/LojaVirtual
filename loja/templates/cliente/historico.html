@@ -1,0 +1,107 @@
+{%extends 'layouts.html'%}
+
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="container mt-5">
+    <div class="col bg-success">
+        {% include '_messages.html' %}
+    </div>
+
+    <div class="row">
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th>Nota Fiscal</th>
+                    <th>Status</th>
+                    <th>Data de Compra</th>
+                    <th>Contato</th>
+                    <th>Ações</th>  <!-- Adicionado campo de ações -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                <tr>
+                    <td>{{ pedido.notaFiscal }}</td>
+                    <td>{{ pedido.status }}</td>
+                    <td>{{ pedido.data_criado}}</td>
+                    <td>{{ current_user.contact }}</td>
+                    <td>
+                        <!-- Botão para abrir modal com detalhes do pedido -->
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#{{pedido.notaFiscal}}">
+                            Detalhes
+                        </button>
+                        
+                        <!-- Modal -->
+                        <div class="modal fade" id="{{pedido.notaFiscal}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Detalhes</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body ">
+                                <table class="table mt-3">
+                                    <thead>
+                                        <tr>
+                                            
+                                            <td>Id</td>
+                                            <td>Produto</td>
+                                            <td>Cor</td>
+                                            <td>Unidade</td>
+                                            <td>Desconto</td>
+                                            <td>Qtd</td>
+                                            <td>Subtotal</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                
+                                        {% for key, produto in pedido.pedido.items() %}
+                                            {% set discount = 0.01 * (produto.discount | float) * (produto.price | float) %}
+                                            <tr>
+                                                <td>{{ loop.index }}</td>
+                                                <td>{{ produto.name }}</td>
+                                                <form action="{{url_for('updateCarro', code = key)}}" method="post">
+                        
+                        
+                                                  <td>
+                                                    {{produto.color| capitalize}}
+                                                  </td>
+                        
+                        
+                        
+                                                  <td>R$ {{ produto.price | float }}</td>
+                                                  <td>R$ {{ discount | float }} / Unidade</td>
+                                                  <td>{{produto.quantity}}</td>
+                                                  {% set subtotal = (produto.quantity | int) * ((produto.price | float) - discount) %}
+                                                  {% set gTotal = gTotal + subtotal %}  <!-- Atualiza o total corretamente -->
+                                                  <td>R$ {{ subtotal | float}}</td>
+                                                  
+                                                </form>
+                                                
+                                            </tr>
+                                        {% endfor %}
+                                       
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+                                <a href="{{url_for('pedidos',notaFiscal = pedido.notaFiscal )}}" class="btn btn-success">Detalhes</a>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+{% endblock %}
