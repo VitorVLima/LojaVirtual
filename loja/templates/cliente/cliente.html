@@ -13,7 +13,7 @@
         <div class="col-md-2"></div>
     </div>
     <form action="" method="post">
-        {{form.csfr_token}}
+        {{form.csrf_token}}
         <div class="row mt-5">
             <div class="col-md-2"></div>
             <div class="col-md-4">
@@ -37,8 +37,11 @@
                 
             </div>
             <div class="col-md-2"></div>
+            
+
         </div>
     </form>
+    <a href="{{ request.referrer }}" class="btn btn-warning btn-sm mt-5">Voltar</a>
 </div>
 
 

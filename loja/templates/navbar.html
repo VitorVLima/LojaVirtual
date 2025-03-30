@@ -18,6 +18,7 @@
                 <li class="nav-item">
                   <a class="nav-link" href="{{url_for('getCart')}}" tabindex="-1">Carrinho ({{session['LojainCarrinho']|length}})</a>
                 </li>
+                
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Marcas
@@ -38,6 +39,30 @@
                       {%endfor%}
                     </ul>
                   </li>
+                {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                  <a class="nav-link" href="" tabindex="-1">Histórico</a>
+                </li>
+
+                <li class="nav-item">
+                  <a href="" class="nav-link ">Logado como: {{current_user.name}}</a>
+                </li>
+                {%endif%}
+                {% if current_user.is_authenticated %}
+                
+                <li class="nav-item">
+                  <a class="btn btn-danger btn-sm" href="{{url_for('cliente_logout')}}" tabindex="-1">Sair</a>
+                </li>
+                {%else%}
+                <li class="nav-item">
+                  <a class="nav-link" href="{{url_for('cadastrar_clientes')}}" tabindex="-1">Cadastrar-se</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" href="{{url_for('clienteLogin')}}" tabindex="-1">Login</a>
+                </li>
+                {%endif%}
+                
               </ul>
               <form method="get" action="{{ url_for('pesquisa') }}" class="d-flex mt-2" role="search">
                 <input type="text" name="query" placeholder="Buscar por produto..." value="{{ pesquisa  }}" class="mr-1">

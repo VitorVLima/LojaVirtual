@@ -15,3 +15,12 @@ retirar  os acentos na hora de pesquisar:
 
 para login:
 - pip install flask-login
+
+para modificar tabelas ja existentes
+-pip install flask-migrate
+
+entrar no site do pdfkit python e instalar o wkhtmltopd
+-pip install pdfkit
+
+metodo de pagamento
+-pip install stripe

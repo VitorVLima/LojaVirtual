@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_uploads import IMAGES, UploadSet, configure_uploads, patch_request_class
 from flask_login import LoginManager, login_manager
+from flask_migrate import Migrate
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -14,6 +15,13 @@ app.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'static/images')
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+
+migrate = Migrate(app, db)
+with app.app_context():
+    if db.engine.url.drivername =="sqlite":
+        migrate.init_app(app,db,render_as_batch=True)
+    else:
+        migrate.init_app(app,db)
 
 #configurações de login
 login_manager = LoginManager()

@@ -1,0 +1,110 @@
+{%extends 'layouts.html'%}
+
+{%block content%}
+
+{%include 'navbar.html'%}
+
+<div class="container mt-5">
+    <div class="col bg-success">{%include '_messages.html'%}</div>
+
+    <div class="row">
+        Numero do Pedido: {{pedidos.notaFiscal}}
+        <br>
+        Status: {{pedidos.status}}
+        <br>
+        Nome do cliente: {{cliente.name}}
+        <br>
+        Email do cliente: {{cliente.email}}
+        <br>
+        Contato do cliente: {{cliente.contact}}
+        <br>
+
+        <table class="table table-sm mt-4">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Cor</th>
+                    <th>Preço</th>
+                    <th>Desconto</th>
+                    <th>Quantidade</th>
+                    <th>Subtotal</th>
+                    
+
+                </tr>
+  
+            </thead>
+            <tbody>
+                
+                {% for key, produto in pedidos.pedido.items() %}
+                    {% set discount = 0.01 * (produto.discount | float) * (produto.price | float) %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ produto.name }}</td>
+                        <form action="{{url_for('updateCarro', code = key)}}" method="post">
+
+
+                          <td>
+                            {{produto.color| capitalize}}
+                          </td>
+
+
+
+                          <td>R$ {{ produto.price | float }}</td>
+                          <td>R$ {{ discount | float }} / Unidade</td>
+                          <td>{{produto.quantity}}</td>
+                          {% set subtotal = (produto.quantity | int) * ((produto.price | float) - discount) %}
+                          {% set gTotal = gTotal + subtotal %}  <!-- Atualiza o total corretamente -->
+                          <td>R$ {{ subtotal | float}}</td>
+                          
+                        </form>
+                        
+                    </tr>
+                {% endfor %}
+               
+                </tbody>
+            </table>
+            <table class="table table-sm">
+                <tr>
+                    <td></td>
+                    {%if pedidos.status == 'Pago'%}
+
+                    {%else%}
+                    <td><form action="{{url_for('pagamento')}}" method="POST">
+                            {% set amount = gTotal|string | replace('.', '') %}
+                            <input type="hidden" name="amount" value="{{amount}}">
+                            <input type="hidden" name="invoice" value="{{pedidos.notaFiscal}}">
+                            <script
+                              src="https://checkout.stripe.com/checkout.js"
+                              class="stripe-button"
+                              data-key="pk_test_51R89TcGbhM6idagMBgsgeIwH7pzJOmXxrK7Yh6ZxBpmJb85DzpwrOZkU3jkj3WmfoHE8dfCTU6dcwt0Eb9JCZKtV00Ls5gHUvS"
+                              data-name="Loja_Flask"
+                              data-description="Pagamento Seguro"
+                              data-amount="{{ (gTotal * 100) | int }}"
+                              data-currency="brl">
+                            </script>
+                          </form>
+
+                         
+                          {%endif%}
+                    </td>
+                    
+                    <td>Imposto</td>
+                    <td colspan="2"> R$ {{imposto}}</td>
+                    <td><strong>Total a Pagar</strong></td>
+                    <td colspan="2"><strong> R$ {{ gTotal}}</strong></td>  <!-- Exibe o total corretamente -->
+                    
+                    <td >
+                        <form action="{{url_for('get_pdf', notaFiscal = pedidos.notaFiscal)}}" method="post" target="_blank">
+                        <button type="submit" class="btn btn-warning btn-sm">Gerar PDF</button>
+                    </form></td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+{%endblock%}

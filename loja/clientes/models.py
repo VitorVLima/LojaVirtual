@@ -1,6 +1,23 @@
 from loja import db, app, login_manager
 from datetime import datetime
 from flask_login import UserMixin
+import json
+
+class JsonEcodedDirect(db.TypeDecorator):
+    impl = db.Text
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return '{}'
+        else:
+            return json.dumps(value)
+        
+    def process_ressult_value(self, value, dialect):
+        if value is None:
+            return {}
+        else:
+            return json.loads(value)
+
 
 @login_manager.user_loader
 def user_carregar(user_id):
@@ -22,7 +39,19 @@ class CadastrarCliente(db.Model, UserMixin):
     data_criado = db.Column(db.DateTime(50), unique = False, nullable = False, default=datetime.utcnow )
 
     def __repr__(self):
-        return '<Cadastrar %r>' % self.name
+        return '<CadastrarCliente %r>' % self.name
+    
+class ClientePedido(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    notaFiscal = db.Column(db.String(50), unique = True, nullable = False)
+    status = db.Column(db.String(50), default='pendente', nullable = False )
+    cliente_id = db.Column(db.String(50), unique = False, nullable = False )
+    data_criado= db.Column(db.DateTime, default=datetime.utcnow, nullable = False)
+    pedido = db.Column(JsonEcodedDirect)
+
+    def __repr__(self):
+        return '<ClientePedido %r>' % self.notaFiscal
+   
     
 with app.app_context():
     db.create_all()
