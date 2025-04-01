@@ -1,10 +1,11 @@
 from flask import redirect, render_template, url_for, flash, request, session, current_app
 from .form import Addprodutos
-from loja import db, app, photos
+from loja import db, app
 from .models import Marca, Categoria, Addproduto
 import secrets, os
 from unidecode import unidecode
 from sqlalchemy import func
+from werkzeug.utils import secure_filename 
 
 @app.route("/")
 def home():
@@ -166,17 +167,28 @@ def deletecat(id):
     flash(f'Não foi possivel deletar a catetoria {categoria.name}', 'danger')
     return redirect(url_for('categoria'))
 
-
-@app.route('/addproduto', methods=['GET','POST'])
+@app.route('/addproduto', methods=['GET', 'POST'])
 def addproduto():
     if 'email' not in session:
         flash(f'Por Favor fazer seu login no sistema', 'danger')
         return redirect(url_for('login'))
-    
+
     marcas = Marca.query.all()
     categorias = Categoria.query.all()
     form = Addprodutos(request.form)
+
+    print(request.method)
+    print(request.form)
+    print(request.files)
+    print(form.errors)
+    print(form.data)
+
     if request.method == 'POST':
+        print("Formulario Validado")
+        print(form.errors)
+        print(request.files)
+        print(request.form)
+
         name = form.name.data
         price = form.price.data
         discount = form.discount.data
@@ -185,18 +197,46 @@ def addproduto():
         desc = form.discription.data
         marca = request.form.get('marca')
         categoria = request.form.get('categoria')
-        image_1 = photos.save(request.files.get('image_1'),name=secrets.token_hex(10)+".")
-        image_2 = photos.save(request.files.get('image_2'),name=secrets.token_hex(10)+".")
-        image_3 = photos.save(request.files.get('image_3'),name=secrets.token_hex(10)+".")
 
-        addpro = Addproduto(name=name,price=price,discount=discount,stock=stock,colors=colors,desc=desc,marca_id=marca,categoria_id=categoria,image_1=image_1, image_2=image_2, image_3=image_3)
+        image_1_file = request.files.get('image_1')
+        image_2_file = request.files.get('image_2')
+        image_3_file = request.files.get('image_3')
+
+        def save_image(image_file):
+            if image_file:
+                filename = secure_filename(image_file.filename)
+                random_hex = secrets.token_hex(10)
+                _, f_ext = os.path.splitext(filename)
+                image_fn = random_hex + f_ext
+                image_path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], image_fn)
+                try:
+                    image_file.save(image_path)
+                    print(f"Imagem salva em: {image_path}")
+                except Exception as e:
+                    print(f"Erro ao salvar imagem: {e}")
+                return image_fn
+            return None
+
+        image_1_fn = save_image(image_1_file)
+        image_2_fn = save_image(image_2_file)
+        image_3_fn = save_image(image_3_file)
+
+        print(f"Image 1 Filename: {image_1_fn}")
+        print(f"Image 2 Filename: {image_2_fn}")
+        print(f"Image 3 Filename: {image_3_fn}")
+
+        addpro = Addproduto(name=name, price=price, discount=discount, stock=stock, colors=colors, desc=desc, marca_id=marca, categoria_id=categoria, image_1=image_1_fn, image_2=image_2_fn, image_3=image_3_fn)
         db.session.add(addpro)
-        db.session.commit()
+        try:
+            db.session.commit()
+            print("Commit realizado com sucesso")
+        except Exception as e:
+            print(f"Erro no commit: {e}")
+        print(os.listdir(app.config['UPLOADED_PHOTOS_DEST']))
         flash(f'O produto {name} foi cadastrado com sucesso', 'success')
         return redirect(url_for('admin'))
 
-
-    return render_template('/produtos/addproduto.html', title = 'Cadastrar Produto', form = form, marcas = marcas, categorias = categorias)
+    return render_template('/produtos/addproduto.html', title='Cadastrar Produto', form=form, marcas=marcas, categorias=categorias)
 
 @app.route('/updateproduto/<int:id>', methods=['GET','POST'])
 def updateproduto(id):
@@ -212,44 +252,38 @@ def updateproduto(id):
     form = Addprodutos(request.form)
 
     if request.method == 'POST':
-        produto.name =form.name.data
-        produto.price = form.price.data 
-        produto.desc = form.discription.data 
-
+        produto.name = form.name.data
+        produto.price = form.price.data
+        produto.desc = form.discription.data
         produto.marca_id = marca
         produto.categoria_id = categoria
+        produto.stock = form.stock.data
+        produto.colors = form.colors.data
+        produto.discount = form.discount.data
 
-        produto.stock = form.stock.data 
-        produto.colors = form.colors.data 
-        produto.discount = form.discount.data 
+        def update_image(image, current_image):
+            if image:
+                filename = secure_filename(image.filename)
+                random_hex = secrets.token_hex(10)
+                _, f_ext = os.path.splitext(filename)
+                image_fn = random_hex + f_ext
+                image_path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], image_fn)
+                image.save(image_path)
+                if current_image:
+                    try:
+                        os.unlink(os.path.join(current_app.root_path, 'static/images/' + current_image))
+                    except:
+                        pass
+                return image_fn
+            return current_image
 
-        if request.files.get('image_1'):
-            try:
-                os.unlink(os.path.join(current_app.root_path, 'static/images/' + produto.image_1))
-                produto.image_1 = photos.save(request.files.get('image_1'),name=secrets.token_hex(10)+".")
-            except:
-                produto.image_1 = photos.save(request.files.get('image_1'),name=secrets.token_hex(10)+".")
-        
-        if request.files.get('image_2'):
-            try:
-                os.unlink(os.path.join(current_app.root_path, 'static/images/' + produto.image_2))
-                produto.image_2 = photos.save(request.files.get('image_2'),name=secrets.token_hex(10)+".")
-            except:
-                produto.image_2 = photos.save(request.files.get('image_2'),name=secrets.token_hex(10)+".")
-        
-        if request.files.get('image_3'):
-            try:
-                os.unlink(os.path.join(current_app.root_path, 'static/images/' + produto.image_3))
-                produto.image_3 = photos.save(request.files.get('image_3'),name=secrets.token_hex(10)+".")
-            except:
-                produto.image_3 = photos.save(request.files.get('image_3'),name=secrets.token_hex(10)+".")
-
-        
+        produto.image_1 = update_image(request.files.get('image_1'), produto.image_1)
+        produto.image_2 = update_image(request.files.get('image_2'), produto.image_2)
+        produto.image_3 = update_image(request.files.get('image_3'), produto.image_3)
 
         db.session.commit()
         flash(f'Produto foi atualizado com sucesso', 'success')
         return redirect('/admin')
-        
 
     form.name.data = produto.name
     form.price.data = produto.price
@@ -257,11 +291,10 @@ def updateproduto(id):
     form.stock.data = produto.stock
     form.colors.data = produto.colors
     form.discount.data = produto.discount
-    
-    
 
+    return render_template('/produtos/updateproduto.html', title='Atualizar Produtos', form=form, marcas=marcas, categorias=categorias, produto=produto)
 
-    return render_template('/produtos/updateproduto.html',title = 'Atualizar Produtos', form = form, marcas = marcas, categorias = categorias, produto = produto)
+# ... (outras rotas)
 
 @app.route('/deleteproduto/<int:id>', methods=['POST'])
 def deleteproduto(id):

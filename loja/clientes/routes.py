@@ -1,6 +1,6 @@
 from flask import redirect, render_template, url_for, flash, request, session, current_app, make_response
 from loja.clientes.forms import CadastroClienteForm, ClienteLoginForm
-from loja import db, app, photos, bcrypt, login_manager
+from loja import db, app, bcrypt, login_manager
 from loja.produtos.models import Marca, Categoria, Addproduto
 import secrets, os
 from loja.clientes.models import CadastrarCliente, ClientePedido

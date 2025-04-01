@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_uploads import IMAGES, UploadSet, configure_uploads, patch_request_class
 from flask_login import LoginManager, login_manager
 from flask_migrate import Migrate
 import os
@@ -30,10 +29,6 @@ login_manager.login_view= 'clienteLogin'
 login_manager.needs_refresh_message_category = 'danger'
 login_manager.login_message = u"FAZER LOGIN PRIMEIRO"
 
-#configurações para carregamento de imagens 
-photos = UploadSet('photos', IMAGES)
-configure_uploads(app, photos)
-patch_request_class(app)
 
 from loja.admin import routes
 from loja.produtos import routes
