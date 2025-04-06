@@ -1,26 +1,27 @@
 {% extends "layouts.html"%}
 
 {% block content %}
-<div class="container">
-    {%from "_formularioajuda.html" import render_field %}
+<div class="container mt-5">  <!-- Aplique a margem aqui diretamente na container -->
+    {% from "_formularioajuda.html" import render_field %}
     <div class="row">
         <div class="col-md-4"></div>
         <div class="col-md-4">
-    
-<div class="text-center h1 text-success mt-20"> Página Login</div>
-    
-    <form action="" method="post" enctype="multipart/form-data">
-        {{form.csfr_token}}
-        <div>
-
-            {{render_field(form.email, class="form-control")}}
-            {{render_field(form.senha, class="form-control")}}
+            <div class="text-center h1 text-success">
+               Login Administrador
+            </div>
+            <form action="" method="post" enctype="multipart/form-data">
+                {{ form.csrf_token }}
+                <div>
+                    {{ render_field(form.email, class="form-control") }}
+                    {{ render_field(form.senha, class="form-control") }}
+                </div>
+                <p><input type="submit" value="Login" class="btn btn-success mt-2"></p>
+                {% include '_messages.html' %}
+            </form>
         </div>
-        <p><input type="submit" value="Login" class="btn btn-success mt-2"></p>
-        {%include '_messages.html'%}
-    </form>
-    <div class="col-md-4"></div>
+        <div class="col-md-4"></div>
+    </div>
 </div>
-</div>
-
+<!-- Botão no canto superior direito -->
+<a href="{{url_for('home')}}" class="btn btn-primary position-absolute top-0 end-0 m-3">Home</a>
 {% endblock %}

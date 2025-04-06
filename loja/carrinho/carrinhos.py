@@ -46,7 +46,7 @@ def getCart():
 
     if 'LojainCarrinho' not in session or len(session['LojainCarrinho']) <= 0:
         return redirect(url_for('home'))
-
+    print(session['LojainCarrinho'])
     subtotal1 = 0
     for key, produto in session['LojainCarrinho'].items():
         discount = (produto['discount'] / 100) * float(produto['price'])
@@ -106,7 +106,9 @@ def rm_Item(id):
 @app.route('/vazio')
 def vazio_Cart():
     try:
-        session.clear()
+        # Limpar apenas o carrinho
+        if 'LojainCarrinho' in session:
+            session.pop('LojainCarrinho')
         return redirect(url_for('home'))
     except Exception as e:
         print(e)

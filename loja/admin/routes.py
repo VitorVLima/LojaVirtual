@@ -5,39 +5,33 @@ import os
 from .models import User
 from loja.produtos.models import Addproduto, Marca, Categoria
 from loja.admin.models import User
-
+from flask_login import login_required, current_user , login_user, logout_user
 
 
 @app.route("/admin")
+@login_required
 def admin():
-    if 'email' not in session:
-        flash(f'Por Favor fazer seu login no sistema', 'danger')
-        return redirect(url_for('login'))
     flash(f'Conectado como: {session['email']}','success')
     produtos = Addproduto.query.all()
     return render_template('admin/index.html', title='Pagina Administrativa', produtos=produtos)
 
 @app.route("/marcas")
+@login_required
 def marcas():
-    if 'email' not in session:
-        flash(f'Por Favor fazer seu login no sistema', 'danger')
-        return redirect(url_for('login'))
     flash(f'Conectado como: {session['email']}','success')
     marcas = Marca.query.order_by(Marca.id.desc()).all()
     return render_template('admin/marcas.html', title='Pagina Fabricantes', marcas = marcas)
 
 @app.route("/categoria")
+@login_required
 def categoria():
-    if 'email' not in session:
-        flash(f'Por Favor fazer seu login no sistema', 'danger')
-        return redirect(url_for('login'))
     flash(f'Conectado como: {session['email']}','success')
     categorias = Categoria.query.order_by(Categoria.id.desc()).all()
     return render_template('admin/categorias.html', title='Pagina Categorias', categorias = categorias)
 
 @app.route('/registrar', methods=['GET', 'POST'])
 def registrar():
-    form = RegistrationForm(request.form)
+    form = RegistrationForm()
     
     if request.method == 'POST':
         if form.validate():
@@ -58,13 +52,19 @@ def registrar():
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    form = LoginFormulario(request.form)
-    if request.method == 'POST' and form.validate():
+    form = LoginFormulario()
+    if request.method == 'POST':
         user = User.query.filter_by(email = form.email.data).first()
         if user and bcrypt.check_password_hash(user.senha, form.senha.data):
-            session['email'] = form.email.data
-            return redirect(request.args.get('next') or url_for('admin'))
+            login_user(user)
+            flash(f'Olá novamente {user.username}', 'success')
+            return redirect(url_for('admin'))
         else:
             flash(f'NAO FOI POSSIVEL ACESSAR O SISTEMA','danger')
             return  redirect(url_for('login'))
     return render_template('admin/login.html',form = form, title='Pagina Login')
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('login'))

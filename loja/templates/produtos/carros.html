@@ -27,19 +27,19 @@
             <tbody>
                 {% set total = 0.0 %}  <!-- Inicializa o total como número flutuante -->
                 {% for key, produto in session['LojainCarrinho'].items() %}
-                    {% set desconto = 0.01 * (produto.discount | float) * (produto.price | float) %}
+                    {% set desconto = 0.01 * (produto['discount'] | float) * (produto['price'] | float) %}
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td><a href="{{url_for('pagina_unica', id = key)}}"><img src="{{url_for('static', filename='images/'+produto.image)}}" alt="{{produto.name}}" height="50"></a></td>
-                        <td>{{ produto.name }}</td>
+                        <td><a href="{{url_for('pagina_unica', id = key)}}"><img src="{{url_for('static', filename='images/'+produto['image'])}}" alt="{{produto['name']}}" height="50"></a></td>
+                        <td>{{ produto['name']}}</td>
                         <form action="{{url_for('updateCarro', code = key)}}" method="post">
 
 
                           <td>
-                            {%set colors = produto.colors.split(',')%}
+                            {%set colors = produto['color'].split(',')%}
                             <label for="colors"></label>
                             <select name="color" id="color">
-                              <option value="{{produto.color}}" style="display: none;"> {{produto.color|capitalize}}</option>
+                              <option value="{{produto['colors']}}" style="display: none;"> {{produto['color']|capitalize}}</option>
                                 {%for color in colors%}
                                 {%set col = color.split(':')%}
                                 <option value="{{col[0]}}">{{col[0]|capitalize}}</option>
@@ -49,10 +49,10 @@
 
 
 
-                          <td>R$ {{ produto.price | float }}</td>
+                          <td>R$ {{ produto['price'] | float }}</td>
                           <td>R$ {{ desconto | float }} / Unidade</td>
-                          <td><input type="number" name="quantity" id="" min="1" max="10" value="{{produto.quantity}}"></td>
-                          {% set subtotal = (produto.quantity | int) * ((produto.price | float) - desconto) %}
+                          <td><input type="number" name="quantity" id="" min="1" max="{{produto.stock}}" value="{{produto['quantity']}}"></td>
+                          {% set subtotal = (produto['quantity'] | int) * ((produto['price'] | float) - desconto) %}
                           {% set total = total + subtotal %}  <!-- Atualiza o total corretamente -->
                           <td>R$ {{ subtotal | float}}</td>
                           <td>

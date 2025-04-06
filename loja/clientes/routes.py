@@ -77,9 +77,8 @@ def cliente_logout():
 def atualizarlojaCarro():
     for _key, produto in session['LojainCarrinho'].items():
         session.modified = True
-        del produto['image']
-        del produto['colors']
-
+        #del produto['image']
+ 
     return atualizarlojaCarro
 
 
@@ -92,6 +91,9 @@ def pedido_order():
         atualizarlojaCarro()
         try:
             p_order = ClientePedido(notaFiscal = notaFiscal, cliente_id = cliente_id, pedido = session['LojainCarrinho'])
+            for _key, produto in session['LojainCarrinho'].items():
+                produtoBanco = Addproduto.query.filter_by(id = _key).first()
+                produtoBanco.stock = produtoBanco.stock - int(produto['quantity'])
             db.session.add(p_order)
             db.session.commit()
             session.pop('LojainCarrinho')
@@ -191,3 +193,28 @@ def historico():
 
     return render_template('cliente/historico.html', pedidos=pedidos, marcas=marcas, categorias=categorias, title='Histórico de pedidos', imposto=imposto, subtotal=subtotal, gTotal=gTotal)
 
+@app.route('/cancelarpedido/<notaFiscal>', methods=['GET', 'POST'])
+@login_required
+def cancelar_pedido(notaFiscal):
+    if current_user.is_authenticated:
+        cliente_id = current_user.id
+        pedidos = ClientePedido.query.filter_by(cliente_id=cliente_id, notaFiscal=notaFiscal).first()
+        print(pedidos)
+        if pedidos:
+            # Verificar se 'pedido' é uma string e converter para dicionário
+            if isinstance(pedidos.pedido, str):  # Verificar se o pedido é uma string
+                pedidos.pedido = json.loads(pedidos.pedido)
+        if request.method == 'POST':
+            try:
+                #redistribui a quantidade de um produto ao estoque no banco caso seja cancelado
+                for _key, produto in pedidos.pedido.items():
+                    produtoBanco = Addproduto.query.filter_by(id = _key).first()
+                    produtoBanco.stock = produtoBanco.stock + int(produto['quantity'])
+
+                db.session.delete(pedidos)
+                db.session.commit()
+                flash(f"Pedido {pedidos.notaFiscal} foi cancelado com sucesso")
+            except Exception as error:
+                flash(f"Pedido {pedidos.notaFiscal} não pode ser cancelado por problemas ao excluir do banco, {error}" )
+            return redirect(url_for('historico'))
+    return redirect(url_for('pedidos', notaFiscal = notaFiscal))

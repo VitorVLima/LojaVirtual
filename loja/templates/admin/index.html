@@ -3,6 +3,9 @@
 {% block content%}
 
 {%include '_messages.html'%}
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
 
 <div class="container">
 
@@ -32,6 +35,9 @@
               <li><a class="dropdown-item" href="{{url_for('addmarca')}}">Add Marcas</a></li>
               <li><a class="dropdown-item" href="{{url_for('addcat')}}">Add Categorias</a></li>
             </ul>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-sm btn-danger mt-2" href="{{url_for('logout')}}">Logout</a>
           </li>
         </ul>
         <form class="d-flex" role="search">
