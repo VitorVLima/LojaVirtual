@@ -11,21 +11,21 @@ from flask_login import login_required, current_user , login_user, logout_user
 @app.route("/admin")
 @login_required
 def admin():
-    flash(f'Conectado como: {session['email']}','success')
+    flash(f'Conectado como administrador ','success')
     produtos = Addproduto.query.all()
     return render_template('admin/index.html', title='Pagina Administrativa', produtos=produtos)
 
 @app.route("/marcas")
 @login_required
 def marcas():
-    flash(f'Conectado como: {session['email']}','success')
+    flash(f'Conectado como administrador ','success')
     marcas = Marca.query.order_by(Marca.id.desc()).all()
     return render_template('admin/marcas.html', title='Pagina Fabricantes', marcas = marcas)
 
 @app.route("/categoria")
 @login_required
 def categoria():
-    flash(f'Conectado como: {session['email']}','success')
+    flash(f'Conectado como administrador ','success')
     categorias = Categoria.query.order_by(Categoria.id.desc()).all()
     return render_template('admin/categorias.html', title='Pagina Categorias', categorias = categorias)
 
